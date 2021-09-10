@@ -2,7 +2,7 @@
 
 
 
-You can see an example of an application with authorization and limit here [sinbadxiii/phalcon-auth-example](https://github.com/sinbadxiii/phalcon-auth-example)
+Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-auth-example](https://github.com/sinbadxiii/phalcon-auth)
 
 ![Banner](https://github.com/sinbadxiii/images/blob/master/phalcon-auth-jwt/logo.png?raw=true)
 
@@ -20,7 +20,7 @@ PHP: ^7.2 || ^8.0
 
 Require the project using composer:
 
-`composer require "sinbadxiii/phalcon-auth-jwt:^v1.0.0"`
+`composer require "sinbadxiii/phalcon-auth-jwt:^v0.1.0"`
 
 ## How use
 
