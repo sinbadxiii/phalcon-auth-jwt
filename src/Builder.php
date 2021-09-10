@@ -48,7 +48,7 @@ class Builder
         return $this->make(array_merge(
             $this->getDefaultClaims(),
             $this->getClaimsForSubject($subject),
-            $subject->getJWTCustomClaims(),
+            ["custom" => $subject->getJWTCustomClaims()],
             $claims
         ));
     }

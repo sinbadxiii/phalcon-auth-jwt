@@ -54,15 +54,25 @@ class Lcobucci extends Provider
     public function encode(array $payload): string
     {
         try {
-            $token = $this->configuration->builder()
-                ->issuedBy($payload['iss'])
-                ->permittedFor('my-audience')
+            $builder = $this->configuration->builder()
+                ->issuedBy($payload['iss']);
+
+            if (!empty($payload['aud'])) {
+                $builder->permittedFor($payload['aud']);
+            }
+
+            $builder->permittedFor($payload['aud'])
                 ->identifiedBy($payload['jti'])
                 ->issuedAt((new DateTimeImmutable())->setTimestamp($payload['iat']))
                 ->relatedTo($payload['sub'])
 //                ->canOnlyBeUsedAfter((new DateTimeImmutable())->modify('+1 minute'))
-                ->expiresAt((new DateTimeImmutable())->setTimestamp($payload['exp']))
-                ->getToken($this->configuration->signer(), $this->configuration->signingKey());
+                ->expiresAt((new DateTimeImmutable())->setTimestamp($payload['exp']));
+
+                foreach ($payload['custom'] as $name => $value) {
+                    $builder->withClaim($name, $value);
+                }
+
+                $token = $builder->getToken($this->configuration->signer(), $this->configuration->signingKey());
 
         } catch (Exception $e) {
             throw new JWTException('Could not create token: '.$e->getMessage(), $e->getCode(), $e);

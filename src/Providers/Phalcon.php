@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Sinbadxiii\PhalconAuthJWT\Providers;
 
 use Exception;
-use Phalcon\Security\JWT\Builder;
 use Phalcon\Security\JWT\Token\Parser;
 use Phalcon\Security\JWT\Signer\Hmac;
 use Phalcon\Security\JWT\Validator;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
+use Sinbadxiii\PhalconAuthJWT\Providers\Phalcon\Builder;
 
 class Phalcon extends Provider
 {
@@ -50,15 +50,22 @@ class Phalcon extends Provider
     {
         //$notBefore  = strtotime('-1 day');
 
-        $tokenObject = $this->builder
-            ->setAudience('my-audience')
-            ->setExpirationTime($payload['exp'])
+        if (!empty($payload['aud'])) {
+            $this->builder->setAudience($payload['aud']);
+        }
+
+        $this->builder->setExpirationTime($payload['exp'])
             ->setIssuer($payload['iss'])
             ->setIssuedAt($payload['iat'])
             ->setId($payload['jti'])
           //  ->setNotBefore($notBefore)
-            ->setSubject($payload['sub'])
-            ->getToken();
+            ->setSubject($payload['sub']);
+
+        foreach ($payload['custom'] as $name => $value) {
+            $this->builder->setCustom($name, $value);
+        }
+
+        $tokenObject = $this->builder->getToken();
 
         return $tokenObject->getToken();
     }

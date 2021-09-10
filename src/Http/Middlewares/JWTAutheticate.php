@@ -55,6 +55,6 @@ class JWTAutheticate extends Authenticate
         $this->response->setStatusCode(401, 'Unauthorized');
         $this->response->setJsonContent($this->getMessage());
         $this->response->send();
-        return false;
+        exit;
     }
 }
