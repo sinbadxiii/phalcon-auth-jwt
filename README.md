@@ -1,8 +1,6 @@
-# Phalcon Auth JWT
+# Phalcon JWT Auth 
 
-
-
-Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-auth-example](https://github.com/sinbadxiii/phalcon-auth)
+Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-auth](https://github.com/sinbadxiii/phalcon-auth)
 
 ![Banner](https://github.com/sinbadxiii/images/blob/master/phalcon-auth-jwt/logo.png?raw=true)
 
@@ -11,6 +9,10 @@ Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-
 <a href="https://packagist.org/packages/sinbadxiii/phalcon-auth-jwt"><img src="https://img.shields.io/packagist/dt/sinbadxiii/phalcon-auth-jwt?style=flat-square" alt="Packagist Downloads"></img></a>
 <a href="https://github.com/sinbadxiii/phalcon-auth-jwt/releases"><img src="https://img.shields.io/github/release/sinbadxiii/phalcon-auth-jwt?style=flat-square" alt="Latest Version"></img></a>
 </p>
+
+## Demo
+
+![Banner](https://github.com/sinbadxiii/images/blob/master/phalcon-auth-jwt/howusage.gif?raw=true)
 
 ## Installation
 
@@ -23,7 +25,6 @@ Require the project using composer:
 `composer require "sinbadxiii/phalcon-auth-jwt:dev-master"`
 
 ## How use
-
 
 ### Configuration
 
