@@ -43,9 +43,10 @@ return [
 
     'providers' => [
         /**
-         * \Sinbadxiii\PhalconAuthJWT\Providers\Phalcon::class,
-         * \Sinbadxiii\PhalconAuthJWT\Providers\Lcobucci::class,
+         * \Sinbadxiii\PhalconAuthJWT\Providers\JWT\Phalcon::class,
+         * \Sinbadxiii\PhalconAuthJWT\Providers\JWT\Lcobucci::class,
          */
-        'jwt' => \Sinbadxiii\PhalconAuthJWT\Providers\Lcobucci::class,
+        'jwt' => \Sinbadxiii\PhalconAuthJWT\Providers\JWT\Lcobucci::class,
+        'storage' => \Sinbadxiii\PhalconAuthJWT\Providers\Storage\Cache::class,
     ],
 ];

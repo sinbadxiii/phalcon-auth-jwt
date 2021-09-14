@@ -2,15 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Providers;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
 use Exception;
 use Phalcon\Security\JWT\Token\Parser;
 use Phalcon\Security\JWT\Signer\Hmac;
 use Phalcon\Security\JWT\Validator;
+use Sinbadxiii\PhalconAuthJWT\Claims\Audience;
+use Sinbadxiii\PhalconAuthJWT\Claims\Claim;
+use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
+use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
+use Sinbadxiii\PhalconAuthJWT\Claims\IssuedAt;
+use Sinbadxiii\PhalconAuthJWT\Claims\Issuer;
+use Sinbadxiii\PhalconAuthJWT\Claims\JwtId;
+use Sinbadxiii\PhalconAuthJWT\Claims\NotBefore;
+use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
-use Sinbadxiii\PhalconAuthJWT\Providers\Phalcon\Builder;
+use Sinbadxiii\PhalconAuthJWT\Providers\JWT\Phalcon\Builder;
 
 class Phalcon extends Provider
 {
@@ -48,20 +57,22 @@ class Phalcon extends Provider
 
     public function encode(array $payload): string
     {
-        //$notBefore  = strtotime('-1 day');
-
-        if (!empty($payload['aud'])) {
-            $this->builder->setAudience($payload['aud']);
+        if (!empty($payload[Audience::NAME])) {
+            $this->builder->setAudience($payload[Audience::NAME]);
         }
 
-        $this->builder->setExpirationTime($payload['exp'])
-            ->setIssuer($payload['iss'])
-            ->setIssuedAt($payload['iat'])
-            ->setId($payload['jti'])
-          //  ->setNotBefore($notBefore)
-            ->setSubject($payload['sub']);
+        $this->builder->setExpirationTime($payload[Expiration::NAME])
+            ->setIssuer($payload[Issuer::NAME])
+            ->setIssuedAt($payload[IssuedAt::NAME])
+            ->setId($payload[JwtId::NAME]);
 
-        foreach ($payload['custom'] as $name => $value) {
+        if (!empty($payload[NotBefore::NAME])) {
+            $this->builder->setNotBefore($payload[NotBefore::NAME]);
+        }
+
+        $this->builder->setSubject($payload[Subject::NAME]);
+
+        foreach ($payload[Custom::KEY] as $name => $value) {
             $this->builder->setCustom($name, $value);
         }
 

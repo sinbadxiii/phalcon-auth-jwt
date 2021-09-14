@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Providers;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
 use DateTimeImmutable;
 use Exception;
@@ -11,6 +11,14 @@ use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use ReflectionClass;
+use Sinbadxiii\PhalconAuthJWT\Claims\Audience;
+use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
+use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
+use Sinbadxiii\PhalconAuthJWT\Claims\IssuedAt;
+use Sinbadxiii\PhalconAuthJWT\Claims\Issuer;
+use Sinbadxiii\PhalconAuthJWT\Claims\JwtId;
+use Sinbadxiii\PhalconAuthJWT\Claims\NotBefore;
+use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
 
@@ -55,24 +63,33 @@ class Lcobucci extends Provider
     {
         try {
             $builder = $this->configuration->builder()
-                ->issuedBy($payload['iss']);
+                ->issuedBy($payload[Issuer::NAME]);
 
-            if (!empty($payload['aud'])) {
-                $builder->permittedFor($payload['aud']);
+            if (!empty($payload[Audience::NAME])) {
+                $builder->permittedFor($payload[Audience::NAME]);
             }
 
-            $builder->permittedFor($payload['aud'])
-                ->identifiedBy($payload['jti'])
-                ->issuedAt((new DateTimeImmutable())->setTimestamp($payload['iat']))
-                ->relatedTo($payload['sub'])
-//                ->canOnlyBeUsedAfter((new DateTimeImmutable())->modify('+1 minute'))
-                ->expiresAt((new DateTimeImmutable())->setTimestamp($payload['exp']));
+            $builder->identifiedBy($payload[JwtId::NAME])
+                ->issuedAt(
+                    (new DateTimeImmutable())->setTimestamp($payload[IssuedAt::NAME])
+                )
+                ->relatedTo($payload[Subject::NAME]);
 
-                foreach ($payload['custom'] as $name => $value) {
-                    $builder->withClaim($name, $value);
-                }
+            if (!empty($payload[NotBefore::NAME])) {
+                $builder->canOnlyBeUsedAfter(
+                    (new DateTimeImmutable())->setTimestamp($payload[NotBefore::NAME])
+                );
+            }
 
-                $token = $builder->getToken($this->configuration->signer(), $this->configuration->signingKey());
+            $builder->expiresAt(
+                (new DateTimeImmutable())->setTimestamp($payload[Expiration::NAME])
+            );
+
+            foreach ($payload[Custom::KEY] as $name => $value) {
+                $builder->withClaim($name, $value);
+            }
+
+            $token = $builder->getToken($this->configuration->signer(), $this->configuration->signingKey());
 
         } catch (Exception $e) {
             throw new JWTException('Could not create token: '.$e->getMessage(), $e->getCode(), $e);

@@ -41,7 +41,8 @@ class JWTAutheticate extends Authenticate
     public function checkForToken()
     {
         if (! $this->auth->parser()->hasToken()) {
-          throw new UnauthorizedHttpException('Token not provided');
+            $this->message = ['status' => 'Token not provided'];
+            $this->unauthenticated();
         }
     }
 
@@ -54,7 +55,9 @@ class JWTAutheticate extends Authenticate
     {
         $this->response->setStatusCode(401, 'Unauthorized');
         $this->response->setJsonContent($this->getMessage());
-        $this->response->send();
+        if (!$this->response->isSent()) {
+            $this->response->send();
+        }
         exit;
     }
 }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Validators;
 
-use Sinbadxiii\PhalconAuthJWT\Builder;
 use Sinbadxiii\PhalconAuthJWT\Claims\Collection;
 use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
 use Sinbadxiii\PhalconAuthJWT\Options;
 use Sinbadxiii\PhalconAuthJWT\Payload;
+use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
 
 class PayloadValidator extends Validator
 {
@@ -44,7 +44,7 @@ class PayloadValidator extends Validator
 
     private static function except(array $array, array $keys)
     {
-        Builder::forget($array, $keys);
+        Helpers::forget($array, $keys);
 
         return $array;
     }

@@ -40,7 +40,7 @@ class JWTManager
     public function decode(Token $token, bool $checkBlacklist = true)
     {
         $payload = $this->provider->payload($token, $this->builder->getOptions());
-
+//var_dump($this->blacklist->has($payload));exit;
         if ($checkBlacklist && $this->blacklistEnabled && $this->blacklist->has($payload)) {
             throw new TokenBlacklistedException();
         }

@@ -6,6 +6,7 @@ namespace Sinbadxiii\PhalconAuthJWT;
 
 use Phalcon\Di;
 use Phalcon\Helper\Arr;
+use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
 use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Claims\Factory as ClaimFactory;
 use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
@@ -48,7 +49,7 @@ class Builder
         return $this->make(array_merge(
             $this->getDefaultClaims(),
             $this->getClaimsForSubject($subject),
-            ["custom" => $subject->getJWTCustomClaims()],
+            [Custom::KEY => $subject->getJWTCustomClaims()],
             $claims
         ));
     }
@@ -76,7 +77,7 @@ class Builder
     protected function getDefaultClaims(): array
     {
         if ($key = array_search(Claims\Issuer::NAME, $this->defaultClaims)) {
-            $iss = self::pull($this->defaultClaims, $key);
+            $iss = Helpers::pull($this->defaultClaims, $key);
         }
 
         return array_merge(
@@ -182,49 +183,5 @@ class Builder
         $this->customValidators[$key] = $validator;
 
         return $this;
-    }
-
-    public static function pull(&$array, $key, $default = null)
-    {
-        $value = Arr::get($array, $key, $default);
-
-        static::forget($array, $key);
-
-        return $value;
-    }
-
-    public static function forget(&$array, $keys)
-    {
-        $original = &$array;
-
-        $keys = (array) $keys;
-
-        if (count($keys) === 0) {
-            return;
-        }
-
-        foreach ($keys as $key) {
-            if (Arr::has($array, $key)) {
-                unset($array[$key]);
-
-                continue;
-            }
-
-            $parts = explode('.', $key);
-
-            $array = &$original;
-
-            while (count($parts) > 1) {
-                $part = array_shift($parts);
-
-                if (isset($array[$part]) && is_array($array[$part])) {
-                    $array = &$array[$part];
-                } else {
-                    continue 2;
-                }
-            }
-
-            unset($array[array_shift($parts)]);
-        }
     }
 }

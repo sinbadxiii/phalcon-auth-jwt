@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Providers\Phalcon;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT\Phalcon;
 
 use Phalcon\Security\JWT\Builder as PhalconBuilder;
 

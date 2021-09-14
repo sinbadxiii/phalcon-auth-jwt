@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Providers;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
 use Phalcon\Helper\Arr;
 use Sinbadxiii\PhalconAuthJWT\Contracts\Providers\JWT;

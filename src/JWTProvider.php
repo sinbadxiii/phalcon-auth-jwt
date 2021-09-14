@@ -31,7 +31,7 @@ class JWTProvider implements ServiceProviderInterface
 
         $di->setShared($this->providerName, function () use ($di, $configJwt) {
 
-            $provider = $configJwt->providers->jwt;
+            $providerJwt = $configJwt->providers->jwt;
 
             $builder = new Builder();
 
@@ -47,12 +47,13 @@ class JWTProvider implements ServiceProviderInterface
                     new InputSource,
             ]);
 
-            /**
-             * @todo доделать блэклисты
-             */
-            $blacklist = [];
+            $providerStorage = $configJwt->providers->storage;
 
-            $manager = new JWTManager(new $provider(
+            $blacklist = new Blacklist(new $providerStorage($di->getCache()));
+
+            $blacklist->setGracePeriod($configJwt->blacklist_grace_period);
+
+            $manager = new JWTManager(new $providerJwt(
                 $configJwt->secret,
                 $configJwt->algo,
                 $configJwt->keys->toArray()
