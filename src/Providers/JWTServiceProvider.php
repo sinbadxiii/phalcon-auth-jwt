@@ -2,25 +2,36 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT;
+namespace Sinbadxiii\PhalconAuthJWT\Providers;
 
+use Phalcon\Di;
 use Phalcon\Di\DiInterface;
 use Phalcon\Di\ServiceProviderInterface;
+use Sinbadxiii\PhalconAuthJWT\Blacklist;
+use Sinbadxiii\PhalconAuthJWT\Builder;
+use Sinbadxiii\PhalconAuthJWT\Guards\JWTGuard;
 use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\AuthHeaders;
 use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\InputSource;
 use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\QueryString;
 use Sinbadxiii\PhalconAuthJWT\Http\Parser\Parser;
+use Sinbadxiii\PhalconAuthJWT\JWT;
+use Sinbadxiii\PhalconAuthJWT\JWTManager;
 
 /**
  * Class JWTProvider
  * @package Sinbadxiii\PhalconAuthJWT
  */
-class JWTProvider implements ServiceProviderInterface
+class JWTServiceProvider implements ServiceProviderInterface
 {
     /**
      * @var string
      */
     protected $providerName = 'jwt';
+
+    public function __construct()
+    {
+        $this->extendAuthGuard();
+    }
 
     /**
      * @param DiInterface $di
@@ -29,7 +40,7 @@ class JWTProvider implements ServiceProviderInterface
     {
         $configJwt =  $di->getShared('config')->path('jwt');
 
-        $di->setShared($this->providerName, function () use ($di, $configJwt) {
+        $di->set($this->providerName, function () use ($di, $configJwt) {
 
             $providerJwt = $configJwt->providers->jwt;
 
@@ -63,5 +74,15 @@ class JWTProvider implements ServiceProviderInterface
 
             return new JWT($builder, $manager, $parser);
         });
+    }
+
+    private function extendAuthGuard()
+    {
+        $auth = Di::getDefault()->getShared("auth");
+
+        $auth->extend('jwt', function($name, $config) use ($auth) {
+                return new JWTGuard($name, $auth->createUserProvider($config));
+            }
+        );
     }
 }
