@@ -12,6 +12,7 @@ use Sinbadxiii\PhalconAuth\Guards\GuardHelper;
 use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
 use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Events\JWTAttempt;
+use Sinbadxiii\PhalconAuthJWT\Events\JWTLogout;
 use Sinbadxiii\PhalconAuthJWT\Events\JWTRefresh;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Http\TokenResponse;
@@ -97,9 +98,11 @@ class JWTGuard implements Guard
         return (bool) $this->attempt($credentials, false);
     }
 
-    public function logout($forceForever = false)
+    public function logout()
     {
-        $this->requireToken()->invalidate($forceForever);
+        $this->requireToken()->invalidate();
+
+        $this->event(new JWTLogout());
 
         $this->user = null;
         $this->jwt->unsetToken();
@@ -166,7 +169,7 @@ class JWTGuard implements Guard
         $token = $this->requireToken()->refresh();
 
         $this->event(
-            new JWTRefresh($this->user, $token)
+            new JWTRefresh()
         );
 
         return $this->tokenResponse($token);
@@ -189,7 +192,7 @@ class JWTGuard implements Guard
         return $this->request;
     }
 
-    protected function validateSubject()
+    protected function validateSubject(?Payload $payload = null): bool
     {
         if (! method_exists($this->provider, 'getModel')) {
             return true;

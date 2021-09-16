@@ -42,8 +42,6 @@ Copy file from `config/jwt.php` in your folder config and merge your config
 
 Update the JWT_SECRET value in config jwt.php or your .env file
 
-## How use
-
 ### Update your User model
 
 Firstly you need to implement the Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject contract on your User model, which requires that you implement the 2 methods `getJWTIdentifier()` and `getJWTCustomClaims()`.
@@ -98,10 +96,10 @@ Inside the `config/auth.php` file you will need to make a few changes to configu
         'provider' => 'users',
     ],
 'providers' => [
-        'users' => [
-            'driver' => 'model',
-            'model'  => \App\Models\Users::class,
-        ],
+    'users' => [
+        'driver' => 'model',
+        'model'  => \App\Models\Users::class,
+     ],
     ],
 ],
 ```
@@ -131,17 +129,22 @@ $router->handle($_SERVER['REQUEST_URI']);
 or write:
 
 ```php 
-
+    use Phalcon\Mvc\Router\Group;
+    
     $router = $di->getRouter(false);
     $router->setDefaultNamespace("App\Controllers");
 
-    $routerJwt = new Group();
+    $routerJwt = new Group(
+        [
+            'namespace' => 'App\Controllers\Auth'
+        ]
+    );
     $routerJwt->setPrefix("/auth");
-  
-    $routerJwt->addPost("/login", 'App\Controllers\Auth\Login::login')->setName("login");
-    $routerJwt->addPost("/logout", 'App\Controllers\Auth\Login::logout')->setName("logout");
-    $routerJwt->addPost("/refresh", 'App\Controllers\Auth\Login::refresh')->setName("refresh");
-    $routerJwt->addPost("/me", 'App\Controllers\Auth\Login::me')->setName("me");
+    
+    $routerJwt->addPost("/login", 'Login::login')->setName("login");
+    $routerJwt->addPost("/logout", 'Login::logout')->setName("logout");
+    $routerJwt->addPost("/refresh", 'Login::refresh')->setName("refresh");
+    $routerJwt->addPost("/me", 'Login::me')->setName("me");
     
     $router->mount($routerJwt);
 
@@ -222,6 +225,11 @@ class LoginController extends Controller
 Attach in your dispatcher service provider middleware `JWTAutheticate`
 
 ```php 
+
+use Sinbadxiii\PhalconAuthJWT\Http\Middlewares\JWTAutheticate;
+
+...
+
 $di->setShared("dispatcher", function () use ($di) {
     $dispatcher = new Dispatcher();
 
@@ -253,6 +261,10 @@ There are a number of ways to send the token via http:
 
 `http://0.0.0.0:8000/me?token=eyJ0eXAiOiJKV1QiLC...`
 
+## Exceptions
+
+
+
 
 ## Methods
 
@@ -278,7 +290,7 @@ Log a user in and return a jwt for them.
 
 ```php 
 // Get some user from somewhere
-$user = User::first();
+$user = User::findFirst(1);
 
 // Get the token
 $token = $this->auth->login($user);
@@ -293,45 +305,35 @@ $user =  $this->auth->user();
 ```
 If the user is not then authenticated, then null will be returned.
 
-###logout()
+### logout()
 Log the user out - which will invalidate the current token and unset the authenticated user.
 
 ```php 
 $this->auth->logout();
-
-// Pass true to force the token to be blacklisted "forever"
-$this->auth->logout(true);
 ```
 
-###refresh()
+### refresh()
 Refresh a token, which invalidates the current one
 
 ```php 
 $newToken = $this->auth->refresh();
-
-// Pass true as the first param to force the token to be blacklisted "forever".
-// The second parameter will reset the claims for the new token
-$newToken = $this->auth->refresh(true, true);
 ```
 
-###invalidate()
+### invalidate()
 Invalidate the token (add it to the blacklist)
 
 ```php 
 $this->auth->invalidate();
-
-// Pass true as the first param to force the token to be blacklisted "forever".
-$this->auth->invalidate(true);
 ```
 
-###tokenById()
+### tokenById()
 Get a token based on a given user's id.
 
 ```php 
 $token = $this->auth->tokenById(1);
 ```
 
-###payload()
+### payload()
 Get the raw JWT payload
 
 ```php 
@@ -344,7 +346,7 @@ $payload('exp') // = 1665544846
 $payload->toArray(); // = ['sub' => 1, 'exp' => 1665544846, 'jti' => 'sFF32fsDfs'] etc
 ```
 
-###validate()
+### validate()
 Validate a user's credentials
 
 ```php 
@@ -353,15 +355,15 @@ if ($this->auth->validate($credentials)) {
 }
 ```
 
-##More advanced usage
+## More advanced usage
 
-###Adding custom claims
+### Adding custom claims
 
 ```php 
 $token = $this->auth->claims(['username' => 'phalconist'])->attempt($credentials);
 ```
 
-###Set the token explicitly
+### Set the token explicitly
 
 ```php 
 $user = $this->auth->setToken('eyJhb...')->user();
