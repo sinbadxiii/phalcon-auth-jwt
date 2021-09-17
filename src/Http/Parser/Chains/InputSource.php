@@ -15,10 +15,6 @@ class InputSource implements ParserContract
      */
     public function parse($request): ?string
     {
-        if (!empty($param = $request->get($this->key))) {
-            return $param;
-        }
-
         if (!empty($jsonRawBody = $request->getJsonRawBody()) && isset($jsonRawBody->{$this->key})) {
             return $jsonRawBody->{$this->key};
         }

@@ -40,8 +40,9 @@ Copy file from `config/jwt.php` in your folder config and merge your config
 
 ### Generate secret key
 
-Update the JWT_SECRET value in config jwt.php or your .env file
+Update the `secret` value in config jwt.php or JWT_SECRET value in your .env file. 
 
+*Generate a 32 character secret phrase like here* https://passwordsgenerator.net/
 ### Update your User model
 
 Firstly you need to implement the Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject contract on your User model, which requires that you implement the 2 methods `getJWTIdentifier()` and `getJWTCustomClaims()`.
@@ -368,6 +369,19 @@ $token = $this->auth->claims(['username' => 'phalconist'])->attempt($credentials
 ```php 
 $user = $this->auth->setToken('eyJhb...')->user();
 ```
+
+### Check token
+Checking the token for correctness
+
+```php 
+$this->auth->parseToken()->checkOrFail()
+```
+
+Will return `true` if everything is ok or Exceptions:
+- Sinbadxiii\PhalconAuthJWT\Exceptions\TokenExpiredException ('The token has expired')
+- Sinbadxiii\PhalconAuthJWT\Exceptions\TokenBlacklistedException ('The token has been blacklisted')
+- Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException
+
 
 
 

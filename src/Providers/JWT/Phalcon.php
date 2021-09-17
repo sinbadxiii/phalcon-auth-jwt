@@ -9,7 +9,6 @@ use Phalcon\Security\JWT\Token\Parser;
 use Phalcon\Security\JWT\Signer\Hmac;
 use Phalcon\Security\JWT\Validator;
 use Sinbadxiii\PhalconAuthJWT\Claims\Audience;
-use Sinbadxiii\PhalconAuthJWT\Claims\Claim;
 use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
 use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
 use Sinbadxiii\PhalconAuthJWT\Claims\IssuedAt;
@@ -73,7 +72,7 @@ class Phalcon extends Provider
         $this->builder->setSubject($payload[Subject::NAME]);
 
         foreach ($payload[Custom::KEY] as $name => $value) {
-            $this->builder->setCustom($name, $value);
+            $this->builder->withClaim($name, $value);
         }
 
         $tokenObject = $this->builder->getToken();
