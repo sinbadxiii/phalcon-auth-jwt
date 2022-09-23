@@ -73,7 +73,7 @@ class Phalcon extends AbstractProvider
 
         if (isset($payload[Custom::NAME])) {
             foreach ($payload[Custom::NAME] as $name => $value) {
-                $this->builder->withClaim($name, $value);
+                $this->builder->addClaim($name, $value);
             }
         }
 

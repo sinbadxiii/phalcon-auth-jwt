@@ -86,7 +86,7 @@ class Lcobucci extends AbstractProvider
             );
 
             foreach ($payload[Custom::NAME] as $name => $value) {
-                $builder->withClaim($name, $value);
+                $builder->addClaim($name, $value);
             }
 
             $token = $builder->getToken($this->configuration->signer(), $this->configuration->signingKey());
