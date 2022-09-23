@@ -1,5 +1,7 @@
 # Phalcon JWT Auth 
 
+Example micro app [sinbadxiii/phalcon-auth-jwt-example](https://github.com/sinbadxiii/phalcon-auth-jwt-example)
+
 Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-auth](https://github.com/sinbadxiii/phalcon-auth)
 
 ![Banner](https://github.com/sinbadxiii/images/blob/master/phalcon-auth-jwt/logo.png?raw=true)
@@ -15,7 +17,7 @@ Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-
 ![Banner](https://github.com/sinbadxiii/images/blob/master/phalcon-auth-jwt/howusage.gif?raw=true)
 
 ## Requirements
-Phalcon: ^4 || ^5
+Phalcon: ^5
 
 PHP: ^7.4 || ^8.1
 
