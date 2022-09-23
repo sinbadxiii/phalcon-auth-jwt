@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT;
 
-use Sinbadxiii\PhalconAuthJWT\Claims\Claim;
+use Sinbadxiii\PhalconAuthJWT\Claims\ClaimInterface;
 use Sinbadxiii\PhalconAuthJWT\Claims\Collection;
 use Sinbadxiii\PhalconAuthJWT\Claims\Factory as ClaimFactory;
 use Sinbadxiii\PhalconAuthJWT\Validators\PayloadValidator;
@@ -19,7 +19,7 @@ class Factory
         $keys = array_keys($claims);
 
         $items = array_map(function ($value, $key) use ($options) {
-                if ($value instanceof Claim) {
+                if ($value instanceof ClaimInterface) {
                     return $value;
                 }
 

@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT;
 
-use Phalcon\Helper\Arr;
+use Phalcon\Support\Helper\Arr\Get;
 
 final class Options
 {
     const LEEWAY = 'leeway';
-
     const REQUIRED_CLAIMS = 'required_claims';
-
     const MAX_REFRESH_PERIOD = 'max_refresh_period';
-
     const VALIDATORS = 'validators';
 
     protected array $options = [];
@@ -25,21 +22,21 @@ final class Options
 
     public function requiredClaims(): array
     {
-        return Arr::get($this->options, static::REQUIRED_CLAIMS, []);
+        return (new Get())($this->options, self::REQUIRED_CLAIMS, []);
     }
 
     public function leeway(): int
     {
-        return Arr::get($this->options, static::LEEWAY, 0);
+        return (new Get())($this->options, self::LEEWAY, 0);
     }
 
     public function maxRefreshPeriod(): ?int
     {
-        return Arr::get($this->options, static::MAX_REFRESH_PERIOD);
+        return (new Get())($this->options, self::MAX_REFRESH_PERIOD);
     }
 
     public function validators(): array
     {
-        return Arr::get($this->options, static::VALIDATORS, []);
+        return (new Get())($this->options, self::VALIDATORS, []);
     }
 }

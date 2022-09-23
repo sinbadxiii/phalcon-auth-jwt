@@ -1,6 +1,6 @@
 <?php
 
-namespace Sinbadxiii\PhalconAuthJWT\Contracts;
+namespace Sinbadxiii\PhalconAuthJWT;
 
 interface JWTSubject
 {

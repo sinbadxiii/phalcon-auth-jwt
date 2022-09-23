@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Sinbadxiii\PhalconAuthJWT\Support;
 
 use Carbon\Carbon;
-use Phalcon\Helper\Arr;
+use Phalcon\Support\Helper\Arr\Get;
+use Phalcon\Support\Helper\Arr\Has;
 
-class Helpers {
-
+class Helpers
+{
     public static function now()
     {
         return Carbon::now('UTC');
@@ -39,7 +40,8 @@ class Helpers {
 
     public static function pull(&$array, $key, $default = null)
     {
-        $value = Arr::get($array, $key, $default);
+        $arrGet = new Get();
+        $value = $arrGet($array, $key, $default);
 
         static::forget($array, $key);
 
@@ -57,7 +59,8 @@ class Helpers {
         }
 
         foreach ($keys as $key) {
-            if (Arr::has($array, $key)) {
+            $arrHas = new Has();
+            if ($arrHas($array, $key)) {
                 unset($array[$key]);
 
                 continue;

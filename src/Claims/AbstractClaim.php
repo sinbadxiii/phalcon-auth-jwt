@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
 use JsonSerializable;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 
-abstract class Claim implements ClaimContract, JsonSerializable
+abstract class AbstractClaim implements ClaimInterface, JsonSerializable
 {
     /**
      * The claim name.
@@ -29,7 +28,7 @@ abstract class Claim implements ClaimContract, JsonSerializable
         $this->setValue($value);
     }
 
-    public function setValue($value): ClaimContract
+    public function setValue($value): ClaimInterface
     {
         $this->value = $this->validateCreate($value);
 
@@ -49,7 +48,7 @@ abstract class Claim implements ClaimContract, JsonSerializable
     /**
      * Set the claim name.
      */
-    public function setName(string $name): ClaimContract
+    public function setName(string $name): ClaimInterface
     {
         $this->name = $name;
 
@@ -87,7 +86,7 @@ abstract class Claim implements ClaimContract, JsonSerializable
     /**
      * Create an instance of the claim.
      */
-    public static function make($value = null): ClaimContract
+    public static function make($value = null): ClaimInterface
     {
         return new static($value);
     }

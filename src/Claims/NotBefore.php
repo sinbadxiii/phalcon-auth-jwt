@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
 
-class NotBefore extends Claim
+class NotBefore extends AbstractClaim
 {
     use DatetimeTrait;
 
@@ -20,7 +19,7 @@ class NotBefore extends Claim
         }
     }
 
-    public static function make($value = null): ClaimContract
+    public static function make($value = null): ClaimInterface
     {
         return new static($value ?? date("U"));
     }

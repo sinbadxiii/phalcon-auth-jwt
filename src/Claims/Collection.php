@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
+use Phalcon\Support\Collection as PhalconCollection;
 
-class Collection extends \Phalcon\Collection
+class Collection extends PhalconCollection
 {
     public function __construct($items = [])
     {
         parent::__construct($this->getArrayableItems($items));
     }
 
-    public function getByClaimName(string $name, ...$args): ?ClaimContract
+    public function getByClaimName(string $name, ...$args): ?ClaimInterface
     {
         return $this->filter->matchesName($name)
             ->first(...$args);
@@ -52,7 +52,7 @@ class Collection extends \Phalcon\Collection
     {
         $claims = [];
         foreach ($items as $key => $value) {
-            if (! is_string($key) && $value instanceof Claim) {
+            if (! is_string($key) && $value instanceof ClaimInterface) {
                 $key = $value->getName();
             }
 

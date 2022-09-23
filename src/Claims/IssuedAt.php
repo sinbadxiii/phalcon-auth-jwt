@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\InvalidClaimException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenExpiredException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
 use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
 
-class IssuedAt extends Claim
+class IssuedAt extends AbstractClaim
 {
     use DatetimeTrait {
         validateCreate as commonValidateCreate;
@@ -54,7 +53,7 @@ class IssuedAt extends Claim
     /**
      * {@inheritdoc}
      */
-    public static function make($value = null): ClaimContract
+    public static function make($value = null): ClaimInterface
     {
         return new static($value ?? Helpers::now());
     }

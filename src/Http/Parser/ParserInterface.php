@@ -1,8 +1,8 @@
 <?php
 
-namespace Sinbadxiii\PhalconAuthJWT\Contracts\Http;
+namespace Sinbadxiii\PhalconAuthJWT\Http\Parser;
 
-interface Parser
+interface ParserInterface
 {
     /**
      * Parse the request.

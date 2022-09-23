@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-class Subject extends Claim
+class Subject extends AbstractClaim
 {
     /**
      * @var string

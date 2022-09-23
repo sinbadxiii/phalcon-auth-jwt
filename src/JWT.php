@@ -5,26 +5,22 @@ declare(strict_types=1);
 namespace Sinbadxiii\PhalconAuthJWT;
 
 use Sinbadxiii\PhalconAuthJWT\Claims\HashedSubject;
-use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Http\Parser\Parser;
 use Sinbadxiii\PhalconAuthJWT\Support\CustomClaims;
-use Sinbadxiii\PhalconAuthJWT\Support\ForwardsCalls;
 
 class JWT
 {
     use CustomClaims;
-    use ForwardsCalls;
 
     protected array $customClaims = [];
 
-
     protected Builder $builder;
-    protected JWTManager $manager;
+    protected Manager $manager;
     protected Parser $parser;
     protected ?Token $token = null;
 
-    public function __construct(Builder $builder, JWTManager $manager, Parser $parser)
+    public function __construct(Builder $builder, Manager $manager, Parser $parser)
     {
         $this->builder = $builder;
         $this->manager = $manager;
@@ -207,7 +203,7 @@ class JWT
 
     public function __call(string $method, array $parameters)
     {
-        return $this->forwardCallTo($this->manager, $method, $parameters);
+        return $this->manager->{$method}(...$parameters);
     }
 
     public function customClaims(array $customClaims): self

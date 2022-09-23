@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Http;
 
-use Sinbadxiii\PhalconAuthJWT\Support\ForwardsCalls;
 use Sinbadxiii\PhalconAuthJWT\Token;
 
 class TokenResponse
 {
-    use ForwardsCalls;
-
     /**
      * The token itself.
      */
@@ -65,6 +62,6 @@ class TokenResponse
      */
     public function __call(string $method, array $parameters)
     {
-        return $this->forwardCallTo($this->token, $method, $parameters);
+        return $this->token->{$method}(...$parameters);
     }
 }

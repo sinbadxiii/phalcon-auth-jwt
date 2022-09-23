@@ -2,8 +2,7 @@
 
 namespace Sinbadxiii\PhalconAuthJWT\Http\Middlewares;
 
-use Sinbadxiii\PhalconAuth\Middlewares\Authenticate;
-use Sinbadxiii\PhalconAuthJWT\Exceptions\UnauthorizedHttpException;
+use Sinbadxiii\PhalconAuth\Access\Authenticate;
 
 /**
  * Class JWTAutheticate
@@ -23,16 +22,13 @@ class JWTAutheticate extends Authenticate
 
     public function authenticate()
     {
-        if (! $this->isGuest()) {
+        $this->checkForToken();
 
-            $this->checkForToken();
-
-            try {
-                $this->auth->parseToken()->checkOrFail();
-            } catch (\Throwable $e) {
-                $this->message = ['status' => $e->getMessage()];
-                $this->unauthenticated();
-            }
+        try {
+            $this->auth->parseToken()->checkOrFail();
+        } catch (\Throwable $e) {
+            $this->message = ['status' => $e->getMessage()];
+            $this->redirectTo();
         }
 
         return true;
@@ -42,7 +38,7 @@ class JWTAutheticate extends Authenticate
     {
         if (! $this->auth->parser()->hasToken()) {
             $this->message = ['status' => 'Token not provided'];
-            $this->unauthenticated();
+            $this->redirectTo();
         }
     }
 

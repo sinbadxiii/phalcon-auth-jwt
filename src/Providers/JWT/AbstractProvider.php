@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
-use Phalcon\Helper\Arr;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Providers\JWT;
+use Phalcon\Support\Helper\Arr\Get;
 use Sinbadxiii\PhalconAuthJWT\Factory;
 use Sinbadxiii\PhalconAuthJWT\Options;
 use Sinbadxiii\PhalconAuthJWT\Payload;
 use Sinbadxiii\PhalconAuthJWT\Token;
 
-abstract class Provider implements JWT
+abstract class AbstractProvider implements ProviderInterface
 {
     /**
      * The secret.
@@ -117,7 +116,8 @@ abstract class Provider implements JWT
      */
     public function getPublicKey()
     {
-        return Arr::get($this->keys, 'public');
+        $arrGet = new Get();
+        return $arrGet($this->keys, 'public');
     }
 
     /**
@@ -128,7 +128,8 @@ abstract class Provider implements JWT
      */
     public function getPrivateKey()
     {
-        return Arr::get($this->keys, 'private');
+        $arrGet = new Get();
+        return $arrGet($this->keys, 'private');
     }
 
     /**
@@ -137,7 +138,8 @@ abstract class Provider implements JWT
      */
     public function getPassphrase(): ?string
     {
-        return Arr::get($this->keys, 'passphrase');
+        $arrGet = new Get();
+        return $arrGet($this->keys, 'passphrase');
     }
 
     /**

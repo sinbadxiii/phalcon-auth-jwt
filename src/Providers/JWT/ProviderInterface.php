@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Contracts\Providers;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
 use Sinbadxiii\PhalconAuthJWT\Options;
 use Sinbadxiii\PhalconAuthJWT\Payload;
 use Sinbadxiii\PhalconAuthJWT\Token;
 
-interface JWT
+interface ProviderInterface
 {
     /**
      * Create a JSON Web Token.

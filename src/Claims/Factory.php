@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 use Sinbadxiii\PhalconAuthJWT\Options;
 
 class Factory
@@ -26,7 +25,7 @@ class Factory
     /**
      * Get the instance of the claim when passing the name and value.
      */
-    public static function get(string $name, $value = null, ?Options $options = null): ClaimContract
+    public static function get(string $name, $value = null, ?Options $options = null): ClaimInterface
     {
         $options ??= new Options();
 
@@ -51,7 +50,7 @@ class Factory
     /**
      * Apply a multiple methods to the given claim if they exist.
      */
-    protected static function applyClaimMethods(ClaimContract $claim, array $data): ClaimContract
+    protected static function applyClaimMethods(ClaimInterface $claim, array $data): ClaimInterface
     {
         foreach ($data as $method => $value) {
             $claim = method_exists($claim, $method)

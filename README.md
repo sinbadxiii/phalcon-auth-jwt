@@ -17,7 +17,7 @@ Additional JWT guard for the Phalcon authentication library [sinbadxiii/phalcon-
 ## Requirements
 Phalcon: ^4 || ^5
 
-PHP: ^7.2 || ^8.0
+PHP: ^7.4 || ^8.1
 
 ## Installation
 
@@ -30,8 +30,52 @@ Run the following command to pull in the latest version::
 ### Add service provider
 
 ```php
-$jwt = new \Sinbadxiii\PhalconAuthJWT\Providers\JWTServiceProvider();
-$jwt->register($di);
+use Sinbadxiii\PhalconAuthJWT\Blacklist;
+use Sinbadxiii\PhalconAuthJWT\Builder;
+use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\AuthHeaders;
+use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\InputSource;
+use Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains\QueryString;
+use Sinbadxiii\PhalconAuthJWT\Http\Parser\Parser;
+use Sinbadxiii\PhalconAuthJWT\JWT;
+use Sinbadxiii\PhalconAuthJWT\Manager as JWTManager;
+
+
+$di->setShared("jwt", function () {
+
+    $configJwt = $this->getConfig()->path('jwt');
+
+    $providerJwt = $configJwt->providers->jwt;
+
+    $builder = new Builder();
+
+    $builder->lockSubject($configJwt->lock_subject)
+        ->setTTL($configJwt->ttl)
+        ->setRequiredClaims($configJwt->required_claims->toArray())
+        ->setLeeway($configJwt->leeway)
+        ->setMaxRefreshPeriod($configJwt->max_refresh_period);
+
+    $parser = new Parser($this->getRequest(), [
+        new AuthHeaders,
+        new QueryString,
+        new InputSource,
+    ]);
+
+    $providerStorage = $configJwt->providers->storage;
+
+    $blacklist = new Blacklist(new $providerStorage($this->getCache()));
+
+    $blacklist->setGracePeriod($configJwt->blacklist_grace_period);
+
+    $manager = new JWTManager(new $providerJwt(
+        $configJwt->secret,
+        $configJwt->algo,
+        $configJwt->keys->toArray()
+    ), $blacklist, $builder);
+
+    $manager->setBlacklistEnabled((bool) $configJwt->blacklist_enabled);
+
+    return new JWT($builder, $manager, $parser);
+});
 ```
 
 ### Configuration
@@ -45,7 +89,7 @@ Update the `secret` value in config jwt.php or JWT_SECRET value in your .env fil
 *Generate a 32 character secret phrase like here* https://passwordsgenerator.net/
 ### Update your User model
 
-Firstly you need to implement the Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject contract on your User model, which requires that you implement the 2 methods `getJWTIdentifier()` and `getJWTCustomClaims()`.
+Firstly you need to implement the Sinbadxiii\PhalconAuthJWT\JWTSubject contract on your User model, which requires that you implement the 2 methods `getJWTIdentifier()` and `getJWTCustomClaims()`.
 
 The example below:
 
@@ -55,9 +99,9 @@ The example below:
 namespace App\Models;
 
 use Phalcon\Mvc\Model;
-use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
+use Sinbadxiii\PhalconAuthJWT\JWTSubject;
 
-class Users extends Model implements JWTSubject
+class User extends Model implements JWTSubject
 {
 
     //...
@@ -78,82 +122,117 @@ class Users extends Model implements JWTSubject
 
 ```
 
-### Configure Auth guard
+### Create auth access, for example "jwt"
 
-Inside the `config/auth.php` file you will need to make a few changes to configure project to use the jwt guard to power your application authentication.
+```php 
+<?php
+
+namespace App\Security\Access;
+
+use Sinbadxiii\PhalconAuth\Access\AbstractAccess;
+
+class Jwt extends AbstractAccess
+{
+    /**
+     * @return bool
+     */
+    public function allowedIf(): bool
+    {
+        return $this->auth->parseToken()->check();
+    }
+}
+```
+
+### Set as a guard JWT
 
 ```php
-'defaults' => [
-    'guard' => 'api',
-    'passwords' => 'users',
-],
-'guards' => [
-//  'web' => [
-//      'driver' => 'session',
-//      'provider' => 'users',
-//   ],
-    'api' => [
-        'driver' => 'jwt',
-        'provider' => 'users',
-    ],
-'providers' => [
-    'users' => [
-        'driver' => 'model',
-        'model'  => \App\Models\Users::class,
-     ],
-    ],
-],
+$di->setShared("auth", function () {
+
+    $security = $this->getSecurity();
+
+    $adapter     = new \Sinbadxiii\PhalconAuth\Adapter\Model($security);
+    $adapter->setModel(App\Models\User::class);
+
+    $guard = new \Sinbadxiii\PhalconAuthJWT\Guard\JWTGuard(
+        $adapter,
+        $this->getJwt(),
+        $this->getRequest(),
+        $this->getEventsManager(),
+    );
+
+    $manager = new Manager();
+    $manager->addGuard("jwt", $guard);
+    $manager->setDefaultGuard($guard);
+
+    $manager->setAccess(new \App\Security\Access\Jwt());
+    $manager->except("/auth/login");
+
+    return $manager;
+});
 ```
 
 Here we are telling the `api` guard to use the `jwt` driver, and we are setting the api guard as the default.
 
 We can now use [Phalcon Auth](https://github.com/sinbadxiii/phalcon-auth) with JWT guard.
 
-### Add some basic authentication routes
-
-An example of your route file with [Phalcon Foundation Auth](https://github.com/sinbadxiii/phalcon-foundation-auth) package :
+### Add some basic handlers
 
 ```php 
-use Sinbadxiii\PhalconFoundationAuth\Routes as AuthRoutes;
+    $application = new \Phalcon\Mvc\Micro($di);
 
-$router = $di->getRouter(false);
-$router->setDefaultNamespace("App\Controllers");
+    $eventsManager = new Manager();
+   
+    $application->post(
+        "/auth/logout",
+        function () {
+            $this->auth->logout();
 
-//...
-
-$router->mount(AuthRoutes::routes());
-$router->mount(AuthRoutes::jwt());
-
-$router->handle($_SERVER['REQUEST_URI']);
-```
-
-or write:
-
-```php 
-    use Phalcon\Mvc\Router\Group;
-    
-    $router = $di->getRouter(false);
-    $router->setDefaultNamespace("App\Controllers");
-
-    $routerJwt = new Group(
-        [
-            'namespace' => 'App\Controllers\Auth'
-        ]
+            return ['message' => 'Successfully logged out'];
+        }
     );
-    $routerJwt->setPrefix("/auth");
-    
-    $routerJwt->addPost("/login", 'Login::login')->setName("login");
-    $routerJwt->addPost("/logout", 'Login::logout')->setName("logout");
-    $routerJwt->addPost("/refresh", 'Login::refresh')->setName("refresh");
-    $routerJwt->addPost("/me", 'Login::me')->setName("me");
-    
-    $router->mount($routerJwt);
 
-    $router->handle($_SERVER['REQUEST_URI']);
+    $application->post(
+        "/auth/refresh",
+        function () {
+            $token = $this->auth->refresh();
+
+            return $token->toResponse();
+        }
+    );
+
+    $application->post(
+        '/auth/login',
+        function () {
+
+            $credentials = [
+                'email' => $this->request->getJsonRawBody()->email,
+                'password' => $this->request->getJsonRawBody()->password
+            ];
+
+            $this->auth->claims(['aud' => [
+                $this->request->getURI()
+            ]]);
+
+            if (! $token = $this->auth->attempt($credentials)) {
+                return ['error' => 'Unauthorized'];
+            }
+
+            return $token->toResponse();
+        }
+    );
+
+    $application->get(
+        '/',
+        function () {
+            return [
+                'message' => 'hello, my friend'
+            ];
+        }
+    );
         
 ```
 
-### Create the Auth Login Controller
+### Example Auth Login Controller
 
 ```php 
 <?php
@@ -166,13 +245,6 @@ use Phalcon\Mvc\Controller;
 
 class LoginController extends Controller
 {
-    protected bool $authAccess = false;
-
-    public function initialize()
-    {
-        $this->view->disable();
-    }
-
     public function loginAction()
     {
         $credentials = [
@@ -212,34 +284,68 @@ class LoginController extends Controller
     {
         $this->response->setJsonContent($token->toResponse())->send();
     }
-
-    public function authAccess()
-    {
-        return $this->authAccess;
-    }
 }
 
 ```
 
 ### Attach Middleware
 
-Attach in your dispatcher service provider middleware `JWTAutheticate`
+Example code for middleware:
 
 ```php 
+<?php
 
-use Sinbadxiii\PhalconAuthJWT\Http\Middlewares\JWTAutheticate;
+namespace App\Middlewares;
 
-...
+use Phalcon\Mvc\Micro\MiddlewareInterface;
+use Phalcon\Mvc\Micro;
 
-$di->setShared("dispatcher", function () use ($di) {
-    $dispatcher = new Dispatcher();
+use function in_array;
 
-    $eventsManager = $di->getShared('eventsManager');
-    $eventsManager->attach('dispatch', new JWTAutheticate());
-    $dispatcher->setEventsManager($eventsManager);
+class AuthMiddleware implements MiddlewareInterface
+{
+    public function call(Micro $application)
+    {
+        $authService = $application->getDI()->get("auth");
 
-    return $dispatcher;
-});
+        if ($access = $authService->getAccess()) {
+            $excepts = $access->getExceptActions();
+
+            $uri = $application->getDI()->get("request")->getURI(true);
+
+            if (!in_array($uri, $excepts)) {
+                try {
+                     $authService->parseToken()->checkOrFail();
+                } catch (\Throwable $t) {
+                    $responseService = $application->getDI()->get("response");
+                    $responseService->setStatusCode(401, 'Unauthorized');
+                    $responseService->setJsonContent(
+                        [
+                            "error" => "Unauthorized: " . $t->getMessage(),
+                            "code" => 401
+                        ]
+                    );
+                    if (!$responseService->isSent()) {
+                        $responseService->send();
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+}
+```
+
+and attach:
+
+```php 
+$application = new \Phalcon\Mvc\Micro($di);
+
+$eventsManager = new Manager();
+
+$eventsManager->attach('micro', new AuthMiddleware());
+$application->before(new AuthMiddleware());
 ```
 
 You should now be able to POST to the login endpoint (e.g. http://0.0.0.0:8000/auth/login) with some valid credentials and see a response like:

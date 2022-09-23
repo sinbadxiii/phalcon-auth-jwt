@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-class Audience extends Claim
+class Audience extends AbstractClaim
 {
     const NAME = 'aud';
 }

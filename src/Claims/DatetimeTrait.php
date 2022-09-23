@@ -8,7 +8,6 @@ use DateInterval;
 use DateTimeInterface;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\InvalidClaimException;
 use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
 
@@ -24,7 +23,7 @@ trait DatetimeTrait
      */
     protected ?int $maxRefreshPeriod = null;
 
-    public function setValue($value): ClaimContract
+    public function setValue($value): ClaimInterface
     {
         if ($value instanceof DateInterval) {
             $value = date("NOW");

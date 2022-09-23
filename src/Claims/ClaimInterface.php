@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Contracts;
+namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-interface Claim
+interface ClaimInterface
 {
     public function setValue($value): self;
 

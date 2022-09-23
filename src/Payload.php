@@ -8,17 +8,14 @@ use ArrayAccess;
 use BadMethodCallException;
 use Countable;
 use JsonSerializable;
-use Phalcon\Helper\Arr;
-use Sinbadxiii\PhalconAuthJWT\Claims\Claim;
+use Phalcon\Support\Helper\Arr\Get;
+use Phalcon\Support\Helper\Arr\Has;
+use Sinbadxiii\PhalconAuthJWT\Claims\ClaimInterface;
 use Sinbadxiii\PhalconAuthJWT\Claims\Collection;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\PayloadException;
-use Sinbadxiii\PhalconAuthJWT\Support\ForwardsCalls;
 
 class Payload implements ArrayAccess, Countable, JsonSerializable
 {
-    use ForwardsCalls;
-
     private Collection $claims;
 
     public function __construct(Collection $claims)
@@ -60,18 +57,19 @@ class Payload implements ArrayAccess, Countable, JsonSerializable
                 return array_map([$this, 'get'], $claim);
             }
 
-            return Arr::get($this->toArray(), $claim);
+            $arrGet = new Get();
+            return $arrGet($this->toArray(), $claim);
         }
 
         return $this->toArray();
     }
 
-    public function getInternal(string $claim): ?ClaimContract
+    public function getInternal(string $claim): ?ClaimInterface
     {
         return $this->claims->getByClaimName($claim);
     }
 
-    public function has(Claim $claim): bool
+    public function has(ClaimInterface $claim): bool
     {
         return $this->claims->has($claim->getName());
     }
@@ -83,7 +81,7 @@ class Payload implements ArrayAccess, Countable, JsonSerializable
 
     public function token(): Token
     {
-        return JWTManager::encode($this);
+        return Manager::encode($this);
     }
 
     public function toArray(): array
@@ -120,37 +118,34 @@ class Payload implements ArrayAccess, Countable, JsonSerializable
      *
      * @param  mixed  $key
      */
-    public function offsetExists($key): bool
+    public function offsetExists(mixed $key): bool
     {
-        return Arr::has($this->toArray(), $key);
+        $arrHas = new Has();
+        return $arrHas($this->toArray(), $key);
     }
 
     /**
-     * Get an item at a given offset.
-     *
-     * @param  mixed  $key
-     *
+     * @param mixed $key
      * @return mixed
      */
-    public function offsetGet($key)
+    public function offsetGet(mixed $key): mixed
     {
-        return Arr::get($this->toArray(), $key);
+        $arrGet = new Get();
+        return $arrGet($this->toArray(), $key);
     }
 
     /**
-     * Don't allow changing the payload as it should be immutable.
-     *
-     * @param  mixed  $key
-     * @param  mixed  $value
-     *
+     * @param $key
+     * @param $value
+     * @return void
      * @throws PayloadException
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         throw new PayloadException();
     }
 
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         throw new PayloadException();
     }
@@ -198,6 +193,8 @@ class Payload implements ArrayAccess, Countable, JsonSerializable
             );
         }
 
-        static::throwBadMethodCallException($method);
+        throw new BadMethodCallException(sprintf(
+            'Call to undefined method %s::%s()', static::class, $method
+        ));
     }
 }

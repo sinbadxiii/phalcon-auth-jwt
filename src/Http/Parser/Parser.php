@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Http\Parser;
 
-use Phalcon\Helper\Arr;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Http\Parser as ParserContract;
+use Phalcon\Support\Helper\Arr\Get;
 
 class Parser
 {
@@ -57,9 +56,10 @@ class Parser
     /**
      * Get a parser by key.
      */
-    public function get(string $key): ?ParserContract
+    public function get(string $key): ?ParserInterface
     {
-        return Arr::get($this->chain, $key);
+        $arrGet = new Get();
+        return $arrGet($this->chain, $key);
     }
 
     /**

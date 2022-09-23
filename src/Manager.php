@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenBlacklistedException;
 use Sinbadxiii\PhalconAuthJWT\Support\CustomClaims;
 
 /**
- * Class JWTManager
+ * Class Manager
  * @package Sinbadxiii\PhalconAuthJWT
  */
-class JWTManager
+class Manager
 {
     use CustomClaims;
 

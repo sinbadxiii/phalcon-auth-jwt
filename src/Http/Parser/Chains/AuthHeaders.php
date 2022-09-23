@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Http\Parser\Chains;
 
-use Sinbadxiii\PhalconAuthJWT\Contracts\Http\Parser as ParserContract;
+use Sinbadxiii\PhalconAuthJWT\Http\Parser\ParserInterface;
 
-class AuthHeaders implements ParserContract
+class AuthHeaders implements ParserInterface
 {
     /**
      * The header name.

@@ -22,7 +22,7 @@ use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
 
-class Lcobucci extends Provider
+class Lcobucci extends AbstractProvider
 {
     protected Configuration $configuration;
 
@@ -85,7 +85,7 @@ class Lcobucci extends Provider
                 (new DateTimeImmutable())->setTimestamp($payload[Expiration::NAME])
             );
 
-            foreach ($payload[Custom::KEY] as $name => $value) {
+            foreach ($payload[Custom::NAME] as $name => $value) {
                 $builder->withClaim($name, $value);
             }
 

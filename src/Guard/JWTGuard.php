@@ -2,58 +2,51 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Guards;
+namespace Sinbadxiii\PhalconAuthJWT\Guard;
 
-use Sinbadxiii\PhalconAuth\Contracts\Guard;
-use Sinbadxiii\PhalconAuth\Events\AfterLogin;
-use Sinbadxiii\PhalconAuth\Events\BeforeLogin;
-use Sinbadxiii\PhalconAuth\Events\EventInterface;
-use Sinbadxiii\PhalconAuth\Guards\GuardHelper;
+use Phalcon\Events\EventsAwareInterface;
+use Phalcon\Events\ManagerInterface;
+use Phalcon\Http\Request;
+use Sinbadxiii\PhalconAuth\Adapter\AdapterInterface;
+use Sinbadxiii\PhalconAuth\Guard\GuardHelper;
+use Sinbadxiii\PhalconAuth\Guard\GuardInterface;
 use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
-use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
-use Sinbadxiii\PhalconAuthJWT\Events\JWTAttempt;
-use Sinbadxiii\PhalconAuthJWT\Events\JWTLogout;
-use Sinbadxiii\PhalconAuthJWT\Events\JWTRefresh;
+use Sinbadxiii\PhalconAuthJWT\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Http\TokenResponse;
 use Sinbadxiii\PhalconAuthJWT\JWT;
-use Phalcon\Helper\Str;
-use Phalcon\Di;
 use Sinbadxiii\PhalconAuthJWT\Payload;
-use Sinbadxiii\PhalconAuthJWT\Support\ForwardsCalls;
 use Sinbadxiii\PhalconAuthJWT\Token;
+use Phalcon\Support\Helper\Str\StartsWith;
 
 /**
  * Class JWTGuard
  * @package Sinbadxiii\PhalconAuth\Guards
  */
-class JWTGuard implements Guard
+class JWTGuard implements GuardInterface, EventsAwareInterface
 {
     use GuardHelper;
-    use ForwardsCalls;
 
     protected JWT $jwt;
     protected $lastAttempted;
-    protected $name;
-    protected $eventsManager;
-    protected $request;
-    protected $provider;
+    protected ManagerInterface $eventsManager;
+    protected Request $request;
+    protected AdapterInterface $adapter;
     protected bool $useResponsable = true;
 
-    public function __construct($name, $provider)
+    public function __construct(AdapterInterface $adapter, JWT $jwt, Request $request, ManagerInterface $eventsManager)
     {
-        $this->name     = $name;
-        $this->provider = $provider;
-        $this->jwt      = Di::getDefault()->getShared("jwt");
-        $this->eventsManager  = Di::getDefault()->getShared("eventsManager");
-        $this->request        = Di::getDefault()->getShared("request");
+        $this->adapter       = $adapter;
+        $this->jwt           = $jwt;
+        $this->request       = $request;
+        $this->eventsManager = $eventsManager;
     }
 
     public function attempt(array $credentials = [], $login = true)
     {
-        $this->lastAttempted = $user = $this->provider->retrieveByCredentials($credentials);
+        $this->lastAttempted = $user = $this->adapter->findFirstByCredentials($credentials);
 
-        $this->event(new JWTAttempt());
+//        $this->event(new JWTAttempt());
 
         if ($this->hasValidCredentials($user, $credentials)) {
             return $login ? $this->login($user) : true;
@@ -64,18 +57,18 @@ class JWTGuard implements Guard
 
     protected function hasValidCredentials($user, $credentials)
     {
-        return !is_null($user) && $this->provider->validateCredentials($user, $credentials);
+        return !is_null($user) && $this->adapter->validateCredentials($user, $credentials);
     }
 
     public function login(JWTSubject $user)
     {
-        $this->event(new BeforeLogin());
+//        $this->event(new BeforeLogin());
 
         $token = $this->jwt->fromUser($user);
 
          $this->setToken($token)->setUser($user);
 
-        $this->event(new AfterLogin());
+//        $this->event(new AfterLogin());
 
         return $this->tokenResponse($token);
     }
@@ -87,7 +80,7 @@ class JWTGuard implements Guard
         }
 
         if (($payload = $this->getPayload()) && $this->validateSubject($payload)) {
-            return $this->user = $this->provider->retrieveById($payload[Subject::NAME]);
+            return $this->user = $this->adapter->findFirstById($payload[Subject::NAME]);
         }
 
         return $this->user;
@@ -102,7 +95,7 @@ class JWTGuard implements Guard
     {
         $this->requireToken()->invalidate();
 
-        $this->event(new JWTLogout());
+//        $this->event(new JWTLogout());
 
         $this->user = null;
         $this->jwt->unsetToken();
@@ -111,11 +104,6 @@ class JWTGuard implements Guard
     public function invalidate($forceForever = false)
     {
         return $this->requireToken()->invalidate($forceForever);
-    }
-
-    public function event(EventInterface $event)
-    {
-        return $this->eventsManager->fire("auth:" . $event->getType(), $this);
     }
 
     public function getTokenForRequest()
@@ -131,7 +119,9 @@ class JWTGuard implements Guard
     {
         $header = $this->request->getHeader('Authorization');
 
-        if (Str::startsWith($header, 'Bearer ')) {
+        $startsWith = new StartsWith();
+
+        if ($startsWith($header, 'Bearer ')) {
             return mb_substr($header, 7, null, 'UTF-8');
         }
     }
@@ -168,9 +158,9 @@ class JWTGuard implements Guard
     {
         $token = $this->requireToken()->refresh();
 
-        $this->event(
-            new JWTRefresh()
-        );
+//        $this->event(
+//            new JWTRefresh()
+//        );
 
         return $this->tokenResponse($token);
     }
@@ -184,7 +174,7 @@ class JWTGuard implements Guard
 
     public function __call(string $method, array $parameters)
     {
-        return $this->forwardCallTo($this->jwt, $method, $parameters);
+        return $this->jwt->{$method}(...$parameters);
     }
 
     public function getRequest()
@@ -194,11 +184,11 @@ class JWTGuard implements Guard
 
     protected function validateSubject(?Payload $payload = null): bool
     {
-        if (! method_exists($this->provider, 'getModel')) {
+        if (! method_exists($this->adapter, 'getModel')) {
             return true;
         }
 
-        return $this->jwt->checkSubjectModel($this->provider->getModel());
+        return $this->jwt->checkSubjectModel($this->adapter->getModel());
     }
 
     public function payload(): Payload
@@ -224,7 +214,7 @@ class JWTGuard implements Guard
 
     public function onceUsingId($id)
     {
-        if ($user = $this->provider->retrieveById($id)) {
+        if ($user = $this->adapter->findFirstById($id)) {
             $this->setUser($user);
 
             return true;
@@ -251,8 +241,25 @@ class JWTGuard implements Guard
 
     public function tokenById($id)
     {
-        if ($user = $this->provider->retrieveById($id)) {
+        if ($user = $this->adapter->findFirstById($id)) {
             return $this->jwt->fromUser($user);
         }
+    }
+
+    /**
+     * @return ManagerInterface|null
+     */
+    public function getEventsManager(): ?ManagerInterface
+    {
+        return $this->eventsManager;
+    }
+
+    /**
+     * @param ManagerInterface $eventsManager
+     * @return void
+     */
+    public function setEventsManager(ManagerInterface $eventsManager): void
+    {
+        $this->eventsManager = $eventsManager;
     }
 }

@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT;
 
-use Phalcon\Di;
-use Phalcon\Helper\Arr;
+use Phalcon\Di\Di;
 use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
-use Sinbadxiii\PhalconAuthJWT\Contracts\JWTSubject;
 use Sinbadxiii\PhalconAuthJWT\Claims\Factory as ClaimFactory;
 use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
 
@@ -49,7 +47,7 @@ class Builder
         return $this->make(array_merge(
             $this->getDefaultClaims(),
             $this->getClaimsForSubject($subject),
-            [Custom::KEY => $subject->getJWTCustomClaims()],
+            [Custom::NAME => $subject->getJWTCustomClaims()],
             $claims
         ));
     }

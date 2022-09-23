@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Providers\Storage;
 
-use Phalcon\Cache as PhalconCache;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Providers\Storage;
+use Phalcon\Cache\Cache as PhalconCache;
 
-class Cache implements Storage
+class Cache implements StorageInterface
 {
     protected PhalconCache $cache;
 

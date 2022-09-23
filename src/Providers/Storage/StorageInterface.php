@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Sinbadxiii\PhalconAuthJWT\Contracts\Providers;
+namespace Sinbadxiii\PhalconAuthJWT\Providers\Storage;
 
-interface Storage
+interface StorageInterface
 {
     /**
      * @param  string  $key

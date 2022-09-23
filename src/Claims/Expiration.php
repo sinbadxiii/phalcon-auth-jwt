@@ -6,7 +6,7 @@ namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenExpiredException;
 
-class Expiration extends Claim
+class Expiration extends AbstractClaim
 {
     use DatetimeTrait;
 

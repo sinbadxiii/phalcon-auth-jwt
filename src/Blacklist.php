@@ -6,7 +6,7 @@ namespace Sinbadxiii\PhalconAuthJWT;
 
 use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
 use Sinbadxiii\PhalconAuthJWT\Claims\JwtId;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Providers\Storage;
+use Sinbadxiii\PhalconAuthJWT\Providers\Storage\StorageInterface;
 use Sinbadxiii\PhalconAuthJWT\Support\Helpers;
 
 class Blacklist
@@ -14,7 +14,7 @@ class Blacklist
     /**
      * The storage.
      */
-    protected Storage $storage;
+    protected StorageInterface $storage;
 
     /**
      * The grace period when a token is blacklisted. In seconds.
@@ -40,7 +40,7 @@ class Blacklist
      */
     const VALID_UNTIL = 'valid_until';
 
-    public function __construct(Storage $storage)
+    public function __construct(StorageInterface $storage)
     {
         $this->storage = $storage;
     }

@@ -16,6 +16,8 @@ abstract class AbstractTestCase extends TestCase
 
         Carbon::setTestNow($now = Carbon::now());
         $this->testNowTimestamp = $now->getTimestamp();
+
+        $this->flushAll();
     }
 
     public function tearDown(): void
@@ -24,5 +26,13 @@ abstract class AbstractTestCase extends TestCase
         Mockery::close();
 
         parent::tearDown();
+    }
+
+    public function flushAll()
+    {
+        $_SERVER  = [];
+        $_REQUEST = [];
+        $_POST    = [];
+        $_GET     = [];
     }
 }

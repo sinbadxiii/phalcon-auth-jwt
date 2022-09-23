@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Sinbadxiii\PhalconAuthJWT\Providers\JWT;
 
 use Exception;
-use Phalcon\Security\JWT\Token\Parser;
-use Phalcon\Security\JWT\Signer\Hmac;
-use Phalcon\Security\JWT\Validator;
+use Phalcon\Encryption\Security\JWT\Token\Parser;
+use Phalcon\Encryption\Security\JWT\Signer\Hmac;
+use Phalcon\Encryption\Security\JWT\Validator;
 use Sinbadxiii\PhalconAuthJWT\Claims\Audience;
 use Sinbadxiii\PhalconAuthJWT\Claims\Custom;
 use Sinbadxiii\PhalconAuthJWT\Claims\Expiration;
@@ -18,9 +18,9 @@ use Sinbadxiii\PhalconAuthJWT\Claims\NotBefore;
 use Sinbadxiii\PhalconAuthJWT\Claims\Subject;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\JWTException;
 use Sinbadxiii\PhalconAuthJWT\Exceptions\TokenInvalidException;
-use Sinbadxiii\PhalconAuthJWT\Providers\JWT\Phalcon\Builder;
+use Phalcon\Encryption\Security\JWT\Builder;
 
-class Phalcon extends Provider
+class Phalcon extends AbstractProvider
 {
     protected Builder $builder;
     protected Parser $parser;
@@ -69,10 +69,12 @@ class Phalcon extends Provider
             $this->builder->setNotBefore($payload[NotBefore::NAME]);
         }
 
-        $this->builder->setSubject($payload[Subject::NAME]);
+        $this->builder->setSubject((string)$payload[Subject::NAME]);
 
-        foreach ($payload[Custom::KEY] as $name => $value) {
-            $this->builder->withClaim($name, $value);
+        if (isset($payload[Custom::NAME])) {
+            foreach ($payload[Custom::NAME] as $name => $value) {
+                $this->builder->withClaim($name, $value);
+            }
         }
 
         $tokenObject = $this->builder->getToken();

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Sinbadxiii\PhalconAuthJWT\Claims;
 
-use Phalcon\Helper\Str;
-use Sinbadxiii\PhalconAuthJWT\Contracts\Claim as ClaimContract;
+use Phalcon\Support\Helper\Str\Random;
 
-class JwtId extends Claim
+class JwtId extends AbstractClaim
 {
     const NAME = 'jti';
 
-    public static function make($value = null): ClaimContract
+    public static function make($value = null): ClaimInterface
     {
-        return new static($value ?? Str::random(16));
+        $random = new Random();
+        return new static($value ?? $random(16));
     }
 }

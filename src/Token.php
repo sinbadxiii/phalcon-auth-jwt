@@ -22,7 +22,7 @@ class Token
 
     public function payload(bool $checkBlacklist = true): Payload
     {
-        return JWTManager::decode($this, $checkBlacklist);
+        return Manager::decode($this, $checkBlacklist);
     }
 
     public function matches($token): bool
