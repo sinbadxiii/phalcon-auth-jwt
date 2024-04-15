@@ -61,7 +61,7 @@ class Phalcon extends AbstractProvider
         }
 
         $this->builder->setExpirationTime($payload[Expiration::NAME])
-            ->setIssuer($payload[Issuer::NAME])
+            ->setIssuer((string)$payload[Issuer::NAME])
             ->setIssuedAt($payload[IssuedAt::NAME])
             ->setId($payload[JwtId::NAME]);
 
