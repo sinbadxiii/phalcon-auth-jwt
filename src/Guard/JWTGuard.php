@@ -6,7 +6,6 @@ namespace Sinbadxiii\PhalconAuthJWT\Guard;
 
 use Phalcon\Events\EventsAwareInterface;
 use Phalcon\Events\ManagerInterface;
-use Phalcon\Http\Request;
 use Sinbadxiii\PhalconAuth\Adapter\AdapterInterface;
 use Sinbadxiii\PhalconAuth\Guard\GuardHelper;
 use Sinbadxiii\PhalconAuth\Guard\GuardInterface;
@@ -30,7 +29,7 @@ class JWTGuard implements GuardInterface, EventsAwareInterface
     protected JWT $jwt;
     protected $lastAttempted;
     protected ManagerInterface $eventsManager;
-    protected Request $request;
+    protected $request;
     protected AdapterInterface $adapter;
     protected bool $useResponsable = true;
 
