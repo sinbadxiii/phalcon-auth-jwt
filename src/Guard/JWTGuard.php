@@ -33,7 +33,7 @@ class JWTGuard implements GuardInterface, EventsAwareInterface
     protected AdapterInterface $adapter;
     protected bool $useResponsable = true;
 
-    public function __construct(AdapterInterface $adapter, JWT $jwt, Request $request, ManagerInterface $eventsManager)
+    public function __construct(AdapterInterface $adapter, JWT $jwt, $request, ManagerInterface $eventsManager)
     {
         $this->adapter       = $adapter;
         $this->jwt           = $jwt;
