@@ -43,7 +43,6 @@ class Collection extends PhalconCollection
         $items = array_map(function ($item) {
             return $item->getValue();
         }, $this->toArray());
-        $this->toArray();
 
         return $items;
     }
